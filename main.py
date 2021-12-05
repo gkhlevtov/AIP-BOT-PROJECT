@@ -273,7 +273,7 @@ def check_photos(message):
 
 @bot.message_handler(commands=['do_it'])
 def do_style(message):
-    """Функция для конечной обработки фото с помщью НС"""
+    """Функция для конечной обработки фото с помощью НС"""
     global config
     chat_id = int(message.chat.id)
     user = user_dict[chat_id]
