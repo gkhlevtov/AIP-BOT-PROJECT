@@ -1,6 +1,7 @@
+-f https://download.pytorch.org/whl/torch_stable.html
 numpy==1.19.5
 matplotlib==3.4.3
-torch==1.10.0
-torchvision==0.11.1
+torch==1.10.0+cpu
+torchvision==0.11.1+cpu
 Pillow==8.4.0
 pyTelegramBotAPI==4.1.0
