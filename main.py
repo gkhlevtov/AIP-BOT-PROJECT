@@ -14,7 +14,7 @@ import torchvision.transforms as transforms
 bot = telebot.TeleBot(os.environ['TELEGRAM_TOKEN'])
 
 
-config = SimpleNamespace()  # Создаем базовый класс пространства имен
+config: SimpleNamespace = SimpleNamespace()  # Создаем базовый класс пространства имен
 config.maxSize = 400  # максимально допустимый размер изображения
 config.totalStep = 50  # общее количество шагов за эпоху
 config.step = 5  # шаг
@@ -46,12 +46,12 @@ ready_markup.add(item3, item4, item5, item6)
 class UserInfo:
     """Класс для хранения информации о пользователе"""
 
-    def __init__(self, userid, original_photo: bool, style_photo: bool, cfg):
+    def __init__(self, userid: str, original_photo: bool, style_photo: bool, config):
         self.id = userid
         self.original_photo = original_photo
         self.style_photo = style_photo
-        self.content = cfg.content
-        self.style = cfg.style
+        self.content = config.content
+        self.style = config.style
         self.directory = f'users\\user{self.id}'
 
 
@@ -65,7 +65,7 @@ class PretrainedNet(nn.Module):
         self.pretrainedNet = models.vgg19(pretrained=True).to(device)  # подгружаю предобученную сеть
 
     def forward(self, x):
-        features = []  # Извлекаю по индексам, которые я прописал выше, feature map из сетки
+        features = []  # Извлекаю по индексам, которые я прописал выше, feature map
         output = x
         for layerIndex in range(len(self.pretrainedNet.features)):
             output = self.pretrainedNet.features[layerIndex](output)
@@ -96,7 +96,7 @@ def load_image(image_path, transform=None, max_size=None, shape=None):
     return image.to(device)
 
 
-def inference(target, user):
+def inference(target, user: UserInfo):
     """Фунция для сохранения фото после обработки"""
     inv_normalize = transforms.Normalize(mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.255],
                                          std=[1 / 0.229, 1 / 0.224, 1 / 0.255])
@@ -112,6 +112,7 @@ def inference(target, user):
                         hspace=0, wspace=0)
     plt.margins(0, 0)
     plt.savefig(f"{user.directory}\\result_image.png", bbox_inches='tight', pad_inches=0)
+    plt.clf()
 
     return styled_img_mp
 
@@ -355,7 +356,7 @@ def do_style(message):
         os.remove(f"{user.directory}\\result_image.png")
 
     else:
-        bot.reply_to(message, "Не все фото готовы, отправьте /check, чтобы посмотреть текущие фото")
+        bot.reply_to(message, 'Не все фото готовы, нажмите "ℹ️ Проверить фото", чтобы посмотреть текущие фото')
 
     user_dict.update({user.id: user})
 
