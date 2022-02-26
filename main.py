@@ -13,7 +13,6 @@ import torchvision.transforms as transforms
 
 bot = telebot.TeleBot(os.environ['TELEGRAM_TOKEN'])
 
-
 config: SimpleNamespace = SimpleNamespace()  # Создаем базовый класс пространства имен
 config.maxSize = 400  # максимально допустимый размер изображения
 config.totalStep = 50  # общее количество шагов за эпоху
@@ -26,7 +25,7 @@ config.style = 'photos\\Style.jpg'
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 vgg16 = torchvision.models.vgg16(
-    pretrained=True).eval()  # загружаем готовую vgg16 с предобученными весами, переключаем в режим проверки
+    pretrained=True).eval()  # загружаем готовую vgg16 с пред обученными весами, переключаем в режим проверки
 
 user_dict = dict()
 
@@ -56,13 +55,13 @@ class UserInfo:
 
 
 class PretrainedNet(nn.Module):
-    """Класс для обозначения предобученной сети"""
+    """Класс для обозначения пред обученной сети"""
 
     def __init__(self):
         # Инициализирую модель
         super(PretrainedNet, self).__init__()
         self.select = [0, 5, 7, 10, 15]  # те слои, через которые я буду пропускать изображение
-        self.pretrainedNet = models.vgg19(pretrained=True).to(device)  # подгружаю предобученную сеть
+        self.pretrainedNet = models.vgg19(pretrained=True).to(device)  # подгружаю пред обученную сеть
 
     def forward(self, x):
         features = []  # Извлекаю по индексам, которые я прописал выше, feature map
@@ -97,7 +96,7 @@ def load_image(image_path, transform=None, max_size=None, shape=None):
 
 
 def inference(target, user: UserInfo):
-    """Фунция для сохранения фото после обработки"""
+    """Функция для сохранения фото после обработки"""
     inv_normalize = transforms.Normalize(mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.255],
                                          std=[1 / 0.229, 1 / 0.224, 1 / 0.255])
     inv_content = inv_normalize(target[0])
@@ -119,7 +118,7 @@ def inference(target, user: UserInfo):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    """Функция для отправки привествия при первом запуске"""
+    """Функция для отправки приветствия при первом запуске"""
     global start_markup
     chat_id = message.chat.id
     user = UserInfo(chat_id, False, False, config)
@@ -293,7 +292,7 @@ def do_style(message):
         style = load_image(config.style, transform, shape=[content.size(3), content.size(2)])
         target = content.clone().requires_grad_(True)
 
-        model = PretrainedNet().eval()  # для использования весов предобученной сетки переводим ее в режим eval
+        model = PretrainedNet().eval()  # для использования весов пред обученной сетки переводим ее в режим eval
         optimizer = torch.optim.Adam([target],
                                      lr=0.1)
         content_criteria = nn.MSELoss()
@@ -316,7 +315,6 @@ def do_style(message):
                 f1 = f1.reshape(c, h * w).to(device)
                 f3 = f3.reshape(c, h * w).to(device)
 
-                # Находим матрицу Грама для конечной и стиля
                 f1 = torch.mm(f1, f1.t())
                 f3 = torch.mm(f3, f3.t())
 
